@@ -1,4 +1,5 @@
-from troposphere import Ref, Template, Output
+from troposphere.constants import NUMBER
+from troposphere import Ref, Template, Output, Parameter
 from troposphere.apigateway import RestApi, Method
 from troposphere.apigateway import Resource, MethodResponse
 from troposphere.apigateway import Integration, IntegrationResponse
@@ -6,11 +7,26 @@ from troposphere.apigateway import Deployment, Stage, ApiStage
 from troposphere.apigateway import UsagePlan, QuotaSettings, ThrottleSettings
 from troposphere.apigateway import ApiKey, StageKey, UsagePlanKey
 from troposphere.iam import Role, Policy
-from troposphere.awslambda import Function, Code, Alias, Environment
+from troposphere.awslambda import Function, Code, Alias, Environment, MEMORY_VALUES
 from troposphere import GetAtt, Join
 
 
 t = Template()
+
+MemorySize = t.add_parameter(Parameter(
+    'LambdaMemorySize',
+    Type=NUMBER,
+    Description='Amount of memory to allocate to the Lambda Function',
+    Default='256',
+    AllowedValues=MEMORY_VALUES
+))
+
+Timeout = t.add_parameter(Parameter(
+    'LambdaTimeout',
+    Type=NUMBER,
+    Description='Timeout in seconds for the Lambda function',
+    Default='10'
+))
 
 # Create the Api Gateway
 rest_api = t.add_resource(RestApi(
@@ -67,6 +83,8 @@ uppercase_function = t.add_resource(Function(
     ),
     Handler="greenhills.Uppercase",
     Role=GetAtt("TransformGatewayLambdaExecutionRole", "Arn"),
+    MemorySize=Ref(MemorySize),
+    Timeout=Ref(Timeout),
     Runtime="java8",
 ))
 
@@ -78,6 +96,8 @@ lowercase_function = t.add_resource(Function(
     ),
     Handler="greenhills.Lowercase",
     Role=GetAtt("TransformGatewayLambdaExecutionRole", "Arn"),
+    MemorySize=Ref(MemorySize),
+    Timeout=Ref(Timeout),
     Runtime="java8",
 ))
 
@@ -91,6 +111,8 @@ get_company_function = t.add_resource(Function(
         "TableNameEnv",
         Variables= {"TABLE_NAME": "DevCompanyTable"}
     ),
+    MemorySize=Ref(MemorySize),
+    Timeout=Ref(Timeout),
     Handler="greenhills.GetCompanyHandler",
     Role=GetAtt("TransformGatewayLambdaExecutionRole", "Arn"),
     Runtime="java8",
