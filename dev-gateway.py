@@ -6,7 +6,7 @@ from troposphere.apigateway import Deployment, Stage, ApiStage
 from troposphere.apigateway import UsagePlan, QuotaSettings, ThrottleSettings
 from troposphere.apigateway import ApiKey, StageKey, UsagePlanKey
 from troposphere.iam import Role, Policy
-from troposphere.awslambda import Function, Code, Alias
+from troposphere.awslambda import Function, Code, Alias, Environment
 from troposphere import GetAtt, Join
 
 
@@ -35,6 +35,13 @@ t.add_resource(Role(
                 "Action": ["lambda:*"],
                 "Resource": "*",
                 "Effect": "Allow"
+            }, {
+                "Effect": "Allow",
+                "Action": [
+                    "dynamodb:GetItem",
+                    "dynamodb:Query"
+                ],
+                "Resource": "arn:aws:dynamodb:*:*:table/DevCompanyTable"
             }]
         })],
     AssumeRolePolicyDocument={"Version": "2012-10-17", "Statement": [
@@ -79,6 +86,10 @@ get_company_function = t.add_resource(Function(
     Code=Code(
         S3Bucket="gs-lambda-store",
         S3Key="get-company.zip"
+    ),
+    Environment=Environment(
+        "TableNameEnv",
+        Variables= {"TABLE_NAME": "DevCompanyTable"}
     ),
     Handler="greenhills.GetCompanyHandler",
     Role=GetAtt("TransformGatewayLambdaExecutionRole", "Arn"),
