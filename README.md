@@ -16,6 +16,10 @@ aws lambda add-permission --function-name arn:aws:lambda:eu-west-1:382959638855:
 
 Cannot use versions / labels above because each stack creation creates an entirely new Lambda Function definition (pointing to the existing lambda zip in the S3 bucket). Therefore setting alias' or versions on an existing lambda definition has no effect.
 
-Proposal:
+**Proposal:**
+
 a separate S3 bucket per 'stage', promoting zip files to the next stage via build
 a separate stack definition per 'stage' (and so separate troposphere definition, referring to different S bucket)
+
+There will be a separate dynamodb per 'stage'. Here is a reminder of the command to add test data to the DB
+aws dynamodb put-item --table-name DevCompanyTable --item file://item.json
