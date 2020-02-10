@@ -58,6 +58,16 @@ t.add_resource(Role(
                     "dynamodb:Query"
                 ],
                 "Resource": "arn:aws:dynamodb:*:*:table/DevCompanyTable"
+            }, {
+                "Effect": "Allow",
+                "Action": [
+                    "kms:Encrypt",
+                    "kms:Decrypt",
+                    "kms:ReEncrypt*",
+                    "kms:GenerateDataKey*",
+                    "kms:DescribeKey"
+                ],
+                "Resource": "arn:aws:kms:*:*:key/274ee5ea-e1a5-4ae6-bcaf-b7f32c0215b4"
             }]
         })],
     AssumeRolePolicyDocument={"Version": "2012-10-17", "Statement": [
@@ -109,7 +119,7 @@ get_company_function = t.add_resource(Function(
     ),
     Environment=Environment(
         "TableNameEnv",
-        Variables= {"TABLE_NAME": "DevCompanyTable"}
+        Variables= {"ENCRYPTED_TABLE_NAME": "AQICAHj7TcK9LFOMG7ASr1CqzDG9KZmgHFc2e261yVwVuEFE1wF/FZ8lRXdsyWqRM5qip4qIAAAAbTBrBgkqhkiG9w0BBwagXjBcAgEAMFcGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMSJd7TiLcc2NGXkcuAgEQgCoqmyAloKi2XTKoUh9BeRUMhsH5s4Rs/glL9U9nogdAyituOg3OSWmqfhw="}
     ),
     MemorySize=Ref(MemorySize),
     Timeout=Ref(Timeout),
